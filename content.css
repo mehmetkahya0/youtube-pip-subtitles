@@ -1,0 +1,29 @@
+/* YouTube PiP Subtitles - Buton Stilleri */
+
+.pip-sub-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 6px !important;
+  opacity: 0.9;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.pip-sub-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.pip-sub-button:active {
+  transform: scale(0.95);
+}
+
+.pip-sub-button svg {
+  width: 22px;
+  height: 22px;
+}

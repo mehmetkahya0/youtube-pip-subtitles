@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PiP Subtitle Ayarları</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #ff0000;
+      --accent-dim: rgba(255,0,0,0.15);
+      --text: #f0f0f0;
+      --text-dim: #888;
+      --radius: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 300px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      padding: 0 0 12px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .header-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .header-text h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .header-text p {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    /* Status badge */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--accent-dim);
+      border-bottom: 1px solid var(--border);
+      font-size: 11.5px;
+      color: var(--text-dim);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #555;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .status-dot.active { background: #22c55e; box-shadow: 0 0 6px #22c55e80; }
+
+    /* Sections */
+    .section {
+      padding: 12px 16px 0;
+    }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    /* Controls */
+    .control {
+      margin-bottom: 12px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+    }
+
+    .control-value {
+      font-size: 11.5px;
+      color: var(--accent);
+      font-weight: 500;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Select */
+    select {
+      width: 100%;
+      padding: 7px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12.5px;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23888'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 14px;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    /* Color inputs */
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+      flex-shrink: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+
+    .color-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      flex: 1;
+    }
+
+    /* Radio toggle */
+    .toggle-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 7px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* Preview */
+    .preview {
+      margin: 12px 16px 4px;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      height: 70px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg, #1a1a1a 0px, #1a1a1a 10px, #161616 10px, #161616 20px
+      );
+    }
+
+    #preview-text {
+      position: relative;
+      z-index: 1;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 8px 16px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .reset-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .reset-btn:hover {
+      border-color: var(--text-dim);
+      color: var(--text);
+    }
+
+    .save-indicator {
+      font-size: 11px;
+      color: #22c55e;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .save-indicator.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">▶</div>
+    <div class="header-text">
+      <h1>PiP Subtitle Ayarları</h1>
+      <p>YouTube Picture-in-Picture altyazı</p>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">PiP aktif değil</span>
+  </div>
+
+  <!-- Font Bölümü -->
+  <div class="section">
+    <div class="section-title">Yazı Tipi</div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Font Boyutu</span>
+        <span class="control-value" id="font-size-val">16px</span>
+      </div>
+      <input type="range" id="font-size" min="10" max="32" value="16" step="1" />
+    </div>
+
+    <div class="control">
+      <div class="control-label"><span>Font Ailesi</span></div>
+      <select id="font-family">
+        <option value="Trebuchet MS">Trebuchet MS (Varsayılan)</option>
+        <option value="Arial">Arial</option>
+        <option value="Georgia">Georgia (Serif)</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Courier New">Courier New (Mono)</option>
+        <option value="Impact">Impact (Güçlü)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Renkler -->
+  <div class="section">
+    <div class="section-title">Renkler</div>
+
+    <div class="control">
+      <div class="color-row">
+        <input type="color" id="text-color" value="#ffffff" />
+        <span class="color-label">Yazı Rengi</span>
+      </div>
+    </div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Arka Plan Opaklığı</span>
+        <span class="control-value" id="bg-opacity-val">75%</span>
+      </div>
+      <input type="range" id="bg-opacity" min="0" max="100" value="75" step="5" />
+    </div>
+  </div>
+
+  <!-- Konum -->
+  <div class="section">
+    <div class="section-title">Konum</div>
+    <div class="toggle-group">
+      <button class="toggle-btn active" data-pos="bottom">⬇ Alt</button>
+      <button class="toggle-btn" data-pos="top">⬆ Üst</button>
+    </div>
+  </div>
+
+  <!-- Önizleme -->
+  <div class="preview">
+    <div id="preview-text">Merhaba, bu bir altyazı önizlemesidir.</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button class="reset-btn" id="reset-btn">Sıfırla</button>
+    <span class="save-indicator" id="save-indicator">✓ Kaydedildi</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
