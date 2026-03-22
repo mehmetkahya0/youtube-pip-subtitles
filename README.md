@@ -21,12 +21,9 @@
 
 <br />
 
-## Test Video
+## 🎥 Demo
 
-<iframe width="560" height="315" src="video/test-video.mp4" title="test" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
-
-
+<video src="video/test-video.mp4" width="100%" controls></video>
 
 ## ⚡ How It Works
 
