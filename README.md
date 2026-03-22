@@ -22,8 +22,7 @@
 <br />
 
 ## 🎥 Demo
-
-<video src="video/test-video.mp4" width="100%" controls></video>
+<video src="https://github.com/user-attachments/assets/ee49ce90-aa6f-44d4-b002-e998ea847e54" width="100%" controls></video>
 
 ## ⚡ How It Works
 
