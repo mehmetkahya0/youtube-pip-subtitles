@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PiP Subtitle Ayarları</title>
+  <title>PiP Subtitle Settings</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -309,80 +309,80 @@
   <div class="header">
     <div class="header-icon">▶</div>
     <div class="header-text">
-      <h1>PiP Subtitle Ayarları</h1>
-      <p>YouTube Picture-in-Picture altyazı</p>
+      <h1>PiP Subtitle Settings</h1>
+      <p>YouTube Picture-in-Picture subtitles</p>
     </div>
   </div>
 
   <!-- Status -->
   <div class="status-bar">
     <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">PiP aktif değil</span>
+    <span id="status-text">PiP not active</span>
   </div>
 
-  <!-- Font Bölümü -->
+  <!-- Font Section -->
   <div class="section">
-    <div class="section-title">Yazı Tipi</div>
+    <div class="section-title">Typography</div>
 
     <div class="control">
       <div class="control-label">
-        <span>Font Boyutu</span>
+        <span>Font Size</span>
         <span class="control-value" id="font-size-val">16px</span>
       </div>
       <input type="range" id="font-size" min="10" max="32" value="16" step="1" />
     </div>
 
     <div class="control">
-      <div class="control-label"><span>Font Ailesi</span></div>
+      <div class="control-label"><span>Font Family</span></div>
       <select id="font-family">
-        <option value="Trebuchet MS">Trebuchet MS (Varsayılan)</option>
+        <option value="Trebuchet MS">Trebuchet MS (Default)</option>
         <option value="Arial">Arial</option>
         <option value="Georgia">Georgia (Serif)</option>
         <option value="Verdana">Verdana</option>
         <option value="Courier New">Courier New (Mono)</option>
-        <option value="Impact">Impact (Güçlü)</option>
+        <option value="Impact">Impact (Bold)</option>
       </select>
     </div>
   </div>
 
-  <!-- Renkler -->
+  <!-- Colors -->
   <div class="section">
-    <div class="section-title">Renkler</div>
+    <div class="section-title">Colors</div>
 
     <div class="control">
       <div class="color-row">
         <input type="color" id="text-color" value="#ffffff" />
-        <span class="color-label">Yazı Rengi</span>
+        <span class="color-label">Text Color</span>
       </div>
     </div>
 
     <div class="control">
       <div class="control-label">
-        <span>Arka Plan Opaklığı</span>
+        <span>Background Opacity</span>
         <span class="control-value" id="bg-opacity-val">75%</span>
       </div>
       <input type="range" id="bg-opacity" min="0" max="100" value="75" step="5" />
     </div>
   </div>
 
-  <!-- Konum -->
+  <!-- Position -->
   <div class="section">
-    <div class="section-title">Konum</div>
+    <div class="section-title">Position</div>
     <div class="toggle-group">
-      <button class="toggle-btn active" data-pos="bottom">⬇ Alt</button>
-      <button class="toggle-btn" data-pos="top">⬆ Üst</button>
+      <button class="toggle-btn active" data-pos="bottom">⬇ Bottom</button>
+      <button class="toggle-btn" data-pos="top">⬆ Top</button>
     </div>
   </div>
 
-  <!-- Önizleme -->
+  <!-- Preview -->
   <div class="preview">
-    <div id="preview-text">Merhaba, bu bir altyazı önizlemesidir.</div>
+    <div id="preview-text">Hello, this is a subtitle preview.</div>
   </div>
 
   <!-- Footer -->
   <div class="footer">
-    <button class="reset-btn" id="reset-btn">Sıfırla</button>
-    <span class="save-indicator" id="save-indicator">✓ Kaydedildi</span>
+    <button class="reset-btn" id="reset-btn">Reset</button>
+    <span class="save-indicator" id="save-indicator">✓ Saved</span>
   </div>
 
   <script src="popup.js"></script>

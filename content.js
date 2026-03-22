@@ -1,14 +1,14 @@
 /**
  * YouTube PiP Subtitles v3
  * 
- * Strateji: YouTube'un timedtext/caption API'sinden altyazı verisini çek,
- * video.currentTime ile senkronize et. YouTube DOM'una bağımlılık YOK.
+ * Strategy: Fetch subtitle data from YouTube's timedtext/caption API,
+ * sync with video.currentTime. NO dependency on YouTube DOM.
  * 
- * Bu yaklaşım çalışır çünkü:
- * - ytInitialPlayerResponse içinde caption track URL'leri var
- * - Bu URL'lerden JSON3 formatında altyazı çekilebilir
- * - video.currentTime polling ile zamanlama yapılır
- * - Video elementi taşınmaz, captureStream kullanılmaz
+ * This approach works because:
+ * - ytInitialPlayerResponse contains caption track URLs
+ * - Subtitles can be fetched in JSON3 format from these URLs
+ * - Timing is done via video.currentTime polling
+ * - Video element is not moved, captureStream is not used
  */
 
 (function () {
@@ -19,7 +19,7 @@
   let pipSubEl      = null;
   let syncInterval  = null;
   let captionData   = [];     // [{start, end, text}]
-  let activeTrack   = null;   // seçili caption track bilgisi
+  let activeTrack   = null;   // selected caption track info
   let allTracks     = [];
 
   let settings = {
@@ -33,7 +33,7 @@
     applyStylesToOverlay();
   });
 
-  // ── YouTube SPA navigasyon ─────────────────────────────────────────────────
+  // ── YouTube SPA navigation ────────────────────────────────────────────────
   let lastUrl = location.href;
   new MutationObserver(() => {
     if (location.href !== lastUrl) {
@@ -47,6 +47,12 @@
     ? document.addEventListener('DOMContentLoaded', () => setTimeout(init, 1500))
     : setTimeout(init, 1500);
 
+  // GoatCounter analytics
+  const gc = (path) => fetch("https://mehmetkahya.goatcounter.com/count?p=" + path, { method: "GET", mode: "no-cors" }).catch(() => {});
+
+  // Ping 1: extension active on YouTube video page
+  if (location.pathname.startsWith("/watch")) gc("/extension-active");
+
   // ── Init ───────────────────────────────────────────────────────────────────
   function init() {
     if (!location.pathname.startsWith('/watch')) return;
@@ -54,8 +60,8 @@
     loadCaptionTracks();
   }
 
-  // ── Butonu Enjekte Et ──────────────────────────────────────────────────────
-  // Hem player toolbar'a hem de video üzerine büyük floating buton ekle
+  // ── Inject Button ─────────────────────────────────────────────────────────
+  // Add button to both the player toolbar and as a large floating button on the video
   function tryInjectButton() {
     injectToolbarButton();
     injectFloatingButton();
@@ -69,7 +75,7 @@
     const btn = document.createElement('button');
     btn.id = 'pip-sub-btn';
     btn.className = 'ytp-button pip-sub-button';
-    btn.title = 'PiP + Altyazı';
+    btn.title = 'PiP + Subtitles';
     btn.innerHTML = buildToolbarSVG(false);
     btn.addEventListener('click', handlePipToggle);
 
@@ -84,7 +90,7 @@
 
     const btn = document.createElement('button');
     btn.id = 'pip-sub-float';
-    btn.textContent = '▶  PiP + Altyazı';
+    btn.textContent = '▶  PiP + Subtitles';
     btn.style.cssText = `
       position: absolute;
       top: 12px; left: 12px;
@@ -105,7 +111,7 @@
     `;
     btn.addEventListener('click', handlePipToggle);
 
-    // Hover'da göster
+    // Show on hover
     player.addEventListener('mouseover', () => { btn.style.opacity = '1'; });
     player.addEventListener('mouseout', () => { btn.style.opacity = '0'; });
 
@@ -123,15 +129,15 @@
     </svg>`;
   }
 
-  // ── Caption Track Yükleme ─────────────────────────────────────────────────
+  // ── Caption Track Loading ─────────────────────────────────────────────────
   function loadCaptionTracks() {
     try {
-      // ytInitialPlayerResponse global değişkeninden oku
+      // Read from ytInitialPlayerResponse global variable
       const pr = window.ytInitialPlayerResponse;
       if (pr?.captions?.playerCaptionsTracklistRenderer?.captionTracks) {
         allTracks = pr.captions.playerCaptionsTracklistRenderer.captionTracks;
-        console.log('[PiP-CC] Track sayısı:', allTracks.length, allTracks.map(t => t.languageCode));
-        // Türkçe varsa seç, yoksa ilki
+        console.log('[PiP-CC] Track count:', allTracks.length, allTracks.map(t => t.languageCode));
+        // Prefer Turkish, then English, then first available
         activeTrack = allTracks.find(t => t.languageCode === 'tr')
                    || allTracks.find(t => t.languageCode === 'en')
                    || allTracks[0];
@@ -140,7 +146,7 @@
       }
     } catch(e) {}
 
-    // Sayfa henüz yüklenmediyse tekrar dene
+    // Retry if page hasn't loaded yet
     setTimeout(loadCaptionTracks, 2000);
   }
 
@@ -151,9 +157,9 @@
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       const data = await resp.json();
       captionData = parseCaptionJSON3(data);
-      console.log('[PiP-CC] Altyazı yüklendi:', captionData.length, 'cue');
+      console.log('[PiP-CC] Subtitles loaded:', captionData.length, 'cues');
     } catch (e) {
-      console.warn('[PiP-CC] Altyazı yüklenemedi:', e.message);
+      console.warn('[PiP-CC] Failed to load subtitles:', e.message);
       captionData = [];
     }
   }
@@ -170,21 +176,21 @@
       .filter(ev => ev.text && ev.text !== '\n');
   }
 
-  // ── PiP Aç/Kapat ──────────────────────────────────────────────────────────
+  // ── PiP Toggle ────────────────────────────────────────────────────────────
   async function handlePipToggle() {
     if (pipWindow && !pipWindow.closed) { pipWindow.close(); return; }
 
     if (!('documentPictureInPicture' in window)) {
-      showToast('⚠️ Chrome 116+ gerekli (Document PiP API)');
+      showToast('⚠️ Chrome 116+ required (Document PiP API)');
       return;
     }
 
     const video = getVideo();
-    if (!video) { showToast('⚠️ Video bulunamadı'); return; }
+    if (!video) { showToast('⚠️ Video not found'); return; }
 
-    // Altyazı yoksa uyar ama devam et
+    // Warn if no subtitles but continue
     if (captionData.length === 0) {
-      console.warn('[PiP-CC] Önceden yüklenmiş altyazı yok, YouTube DOM fallback deneniyor.');
+      console.warn('[PiP-CC] No pre-loaded subtitles, trying YouTube DOM fallback.');
     }
 
     try {
@@ -197,9 +203,10 @@
 
       setupPipWindow(pipWindow, video);
       updateButtonState(true);
+      gc("/pip-opened");
 
       const floatBtn = document.getElementById('pip-sub-float');
-      if (floatBtn) floatBtn.textContent = '✕  PiP Kapat';
+      if (floatBtn) floatBtn.textContent = '✕  Close PiP';
 
     } catch (err) {
       console.error('[PiP-CC]', err);
@@ -207,12 +214,12 @@
     }
   }
 
-  // ── PiP Pencere Kurulumu ───────────────────────────────────────────────────
+  // ── PiP Window Setup ──────────────────────────────────────────────────────
   function setupPipWindow(win, video) {
     const doc = win.document;
     doc.title = 'YouTube PiP';
 
-    // Stiller
+    // Styles
     const style = doc.createElement('style');
     style.id = 'pip-styles';
     style.textContent = buildCSS();
@@ -223,7 +230,7 @@
     wrapper.id = 'pip-wrapper';
     doc.body.appendChild(wrapper);
 
-    // Video: captureStream dene, başarısızsa element taşı
+    // Video: try captureStream, fall back to moving element
     let streamOk = false;
     try {
       const stream = video.captureStream?.();
@@ -237,7 +244,7 @@
         console.log('[PiP-CC] captureStream OK');
       }
     } catch(e) {
-      console.warn('[PiP-CC] captureStream başarısız:', e.message);
+      console.warn('[PiP-CC] captureStream failed:', e.message);
     }
 
     if (!streamOk) {
@@ -245,10 +252,10 @@
       win._origNext   = video.nextSibling;
       video.style.cssText = 'width:100%;height:100%;display:block;object-fit:contain;background:#000;';
       wrapper.appendChild(video);
-      console.log('[PiP-CC] Video element taşındı.');
+      console.log('[PiP-CC] Video element moved.');
     }
 
-    // Altyazı overlay
+    // Subtitle overlay
     const overlay = doc.createElement('div');
     overlay.id = 'pip-sub-overlay';
     const subBox = doc.createElement('div');
@@ -261,10 +268,10 @@
     win.addEventListener('pagehide', () => onPipClose(video, streamOk, win));
   }
 
-  // ── Altyazı Senkronizasyonu ────────────────────────────────────────────────
+  // ── Subtitle Synchronization ──────────────────────────────────────────────
   function startSync(video, win, streamOk) {
-    // captureStream kullanıldıysa ana video referansı doğru,
-    // element taşındıysa win.document'teki video kullanılır
+    // If captureStream was used, main video reference is correct,
+    // if element was moved, use the video from win.document
     let lastText = '';
 
     syncInterval = setInterval(() => {
@@ -274,13 +281,13 @@
       const t   = vid.currentTime;
       let text  = '';
 
-      // 1. Önce prefetch edilmiş caption verisi
+      // 1. First check prefetched caption data
       if (captionData.length > 0) {
         const matches = captionData.filter(c => t >= c.start && t < c.end);
         text = matches.map(c => c.text).join(' ').trim();
       }
 
-      // 2. Fallback: YouTube DOM'undaki aktif caption elementi
+      // 2. Fallback: active caption element in YouTube DOM
       if (!text) {
         const domText = getDOMCaptions();
         if (domText) text = domText;
@@ -299,7 +306,7 @@
     }, 100);
   }
 
-  // YouTube DOM'undaki caption metin fallback
+  // YouTube DOM caption text fallback
   const SELECTORS = [
     '.ytp-caption-segment',
     '.captions-text',
@@ -321,10 +328,10 @@
     return '';
   }
 
-  // ── Track Seçimi (birden fazla dil için) ──────────────────────────────────
-  // Kullanıcı YouTube'da bir dil seçtiğinde biz de o dili taklit et
+  // ── Track Selection (for multiple languages) ─────────────────────────────
+  // When user selects a language on YouTube, mirror that selection
   function watchActiveTrack() {
-    // YouTube'un aktif caption track'ini bul
+    // Find YouTube's active caption track
     setInterval(() => {
       const activeSel = document.querySelector('.ytp-menuitem[aria-checked="true"] .ytp-menuitem-label');
       if (!activeSel || !allTracks.length) return;
@@ -375,7 +382,7 @@
     if (el) el.textContent = buildCSS();
   }
 
-  // ── Kapanış ────────────────────────────────────────────────────────────────
+  // ── Cleanup ────────────────────────────────────────────────────────────────
   function onPipClose(video, streamOk, win) {
     clearInterval(syncInterval); syncInterval = null;
     pipSubEl = null;
@@ -394,10 +401,10 @@
     pipWindow = null;
     updateButtonState(false);
     const floatBtn = document.getElementById('pip-sub-float');
-    if (floatBtn) floatBtn.textContent = '▶  PiP + Altyazı';
+    if (floatBtn) floatBtn.textContent = '▶  PiP + Subtitles';
   }
 
-  // ── Yardımcı ──────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
   function getVideo() {
     return document.querySelector('video.html5-main-video')
         || document.querySelector('#movie_player video')
@@ -425,7 +432,7 @@
     setTimeout(() => t.remove(), 4000);
   }
 
-  // Track değişimini izle
+  // Watch for track changes
   setTimeout(watchActiveTrack, 3000);
 
 })();

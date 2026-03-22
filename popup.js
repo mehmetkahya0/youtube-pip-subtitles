@@ -1,7 +1,12 @@
 /**
  * YouTube PiP Subtitles - Popup Script
- * Ayarları okur, günceller, chrome.storage.sync'e kaydeder.
+ * Reads, updates, and saves settings to chrome.storage.sync.
  */
+
+// GoatCounter: increment counter every time popup is opened
+fetch('https://mehmetkahya.goatcounter.com/count?p=/popup-opened', {
+  method: 'GET', mode: 'no-cors'
+}).catch(() => {});
 
 const defaults = {
   fontSize: 16,
@@ -11,7 +16,7 @@ const defaults = {
   position: 'bottom',
 };
 
-// Elementler
+// Elements
 const fontSizeInput   = document.getElementById('font-size');
 const fontSizeVal     = document.getElementById('font-size-val');
 const fontFamilyInput = document.getElementById('font-family');
@@ -27,7 +32,7 @@ const posButtons      = document.querySelectorAll('.toggle-btn[data-pos]');
 
 let saveTimer = null;
 
-// ─── Yükle ───────────────────────────────────────────────────────────────────
+// ─── Load ────────────────────────────────────────────────────────────────────
 chrome.storage.sync.get(defaults, (saved) => {
   fontSizeInput.value   = saved.fontSize;
   fontSizeVal.textContent = saved.fontSize + 'px';
@@ -71,15 +76,15 @@ resetBtn.addEventListener('click', () => {
   saveAndPreview();
 });
 
-// ─── Kaydet & Önizle ─────────────────────────────────────────────────────────
+// ─── Save & Preview ──────────────────────────────────────────────────────────
 function saveAndPreview() {
   const current = getCurrentSettings();
   updatePreview(current);
 
-  // Debounce ile kaydet
+  // Save with debounce
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    // bgColor string olarak oluştur
+    // Build bgColor as string
     const opacity = (current.bgOpacity / 100).toFixed(2);
     const toSave = {
       ...current,
@@ -121,17 +126,17 @@ function flashSaved() {
   setTimeout(() => saveIndicator.classList.remove('show'), 1800);
 }
 
-// ─── PiP Durum Kontrolü ──────────────────────────────────────────────────────
-// Aktif YouTube sekmesini sorgula
+// ─── PiP Status Check ────────────────────────────────────────────────────────
+// Query the active YouTube tab
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   if (!tabs[0]) return;
   const url = tabs[0].url || '';
   if (url.includes('youtube.com/watch')) {
     statusDot.classList.add('active');
-    statusText.textContent = 'YouTube video sayfasında aktif';
+    statusText.textContent = 'Active on YouTube video page';
   } else if (url.includes('youtube.com')) {
-    statusText.textContent = 'Bir video sayfasına git';
+    statusText.textContent = 'Go to a video page';
   } else {
-    statusText.textContent = 'YouTube\'da çalışır';
+    statusText.textContent = 'Works on YouTube';
   }
 });
