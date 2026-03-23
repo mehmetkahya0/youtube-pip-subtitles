@@ -64,7 +64,7 @@ The result: a **Document Picture-in-Picture** window (Chrome 116+) that can rend
 
 1. **Clone** or download this repository:
    ```bash
-   git clone https://github.com/your-username/youtube-pip-subtitles.git
+   git clone https://github.com/mehmetkahya0/youtube-pip-subtitles.git
    ```
 2. Open Chrome → navigate to `chrome://extensions`
 3. Enable **Developer mode** (top-right toggle)
