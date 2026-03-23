@@ -10,7 +10,7 @@
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-FF6D00?style=for-the-badge&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/)
 [![License MIT](https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0-blueviolet?style=for-the-badge)]()
-
+![Views Counter](https://views-counter.vercel.app/badge?pageId=https%3A%2F%2Fgithub%2Ecom%2Fmehmetkahya0%2Fyoutube-pip-subtitles&leftColor=000000&rightColor=db0a0a&type=total&label=VISITORS&style=none)
 <br />
 
 *When you pop a YouTube video into PiP mode, subtitles vanish —*
